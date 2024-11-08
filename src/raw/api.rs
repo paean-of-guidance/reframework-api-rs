@@ -427,19 +427,73 @@ pub struct REFrameworkSDKFunctions {
 /// the functions, however, can return the actual objects
 #[repr(C)]
 pub struct REFrameworkSDKData {
-    pub functions: *const REFrameworkSDKFunctions,
-    pub tdb: *const REFrameworkTDB,
-    pub type_definition: *const REFrameworkTDBTypeDefinition,
-    pub method: *const REFrameworkTDBMethod,
-    pub field: *const REFrameworkTDBField,
-    pub property: *const REFrameworkTDBProperty,
-    pub managed_object: *const REFrameworkManagedObject,
-    pub resource_manager: *const REFrameworkResourceManager,
-    pub resource: *const REFrameworkResource,
-    pub type_info: *const REFrameworkTypeInfo, // NOT a type definition
-    pub vm_context: *const REFrameworkVMContext,
-    pub reflection_method: *const REFrameworkReflectionMethod, // NOT a TDB method
-    pub reflection_property: *const REFrameworkReflectionProperty, // NOT a TDB property
+    functions: *const REFrameworkSDKFunctions,
+    tdb: *const REFrameworkTDB,
+    type_definition: *const REFrameworkTDBTypeDefinition,
+    method: *const REFrameworkTDBMethod,
+    field: *const REFrameworkTDBField,
+    property: *const REFrameworkTDBProperty,
+    managed_object: *const REFrameworkManagedObject,
+    resource_manager: *const REFrameworkResourceManager,
+    resource: *const REFrameworkResource,
+    type_info: *const REFrameworkTypeInfo, // NOT a type definition
+    vm_context: *const REFrameworkVMContext,
+    reflection_method: *const REFrameworkReflectionMethod, // NOT a TDB method
+    reflection_property: *const REFrameworkReflectionProperty, // NOT a TDB property
+}
+
+impl REFrameworkSDKData {
+    pub fn functions(&self) -> &REFrameworkSDKFunctions {
+        unsafe { &*self.functions }
+    }
+
+    pub fn tdb(&self) -> &REFrameworkTDB {
+        unsafe { &*self.tdb }
+    }
+
+    pub fn type_definition(&self) -> &REFrameworkTDBTypeDefinition {
+        unsafe { &*self.type_definition }
+    }
+
+    pub fn method(&self) -> &REFrameworkTDBMethod {
+        unsafe { &*self.method }
+    }
+
+    pub fn field(&self) -> &REFrameworkTDBField {
+        unsafe { &*self.field }
+    }
+
+    pub fn property(&self) -> &REFrameworkTDBProperty {
+        unsafe { &*self.property }
+    }
+
+    pub fn managed_object(&self) -> &REFrameworkManagedObject {
+        unsafe { &*self.managed_object }
+    }
+
+    pub fn resource_manager(&self) -> &REFrameworkResourceManager {
+        unsafe { &*self.resource_manager }
+    }
+
+    pub fn resource(&self) -> &REFrameworkResource {
+        unsafe { &*self.resource }
+    }
+
+    pub fn type_info(&self) -> &REFrameworkTypeInfo {
+        unsafe { &*self.type_info }
+    }
+
+    pub fn vm_context(&self) -> &REFrameworkVMContext {
+        unsafe { &*self.vm_context }
+    }
+
+    pub fn reflection_method(&self) -> &REFrameworkReflectionMethod {
+        unsafe { &*self.reflection_method }
+    }
+
+    pub fn reflection_property(&self) -> &REFrameworkReflectionProperty {
+        unsafe { &*self.reflection_property }
+    }
 }
 
 #[repr(C)]
@@ -452,7 +506,6 @@ pub struct REFrameworkPluginInitializeParam {
 }
 
 impl REFrameworkPluginInitializeParam {
-    #[inline]
     pub fn functions(&self) -> &REFrameworkPluginFunctions {
         unsafe { &*self.functions }
     }

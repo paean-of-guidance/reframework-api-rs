@@ -5,6 +5,9 @@ use crate::raw::api::*;
 mod basic_logger;
 #[cfg(feature = "logging")]
 mod logger;
+mod wrapper;
+
+pub use wrapper::*;
 
 pub const REFRAMEWORK_PLUGIN_VERSION_MAJOR: i32 = 1;
 pub const REFRAMEWORK_PLUGIN_VERSION_MINOR: i32 = 10;
@@ -83,17 +86,23 @@ impl RefAPI {
         self.sdk
     }
 
-    #[inline]
     pub fn param(&self) -> &REFrameworkPluginInitializeParam {
         unsafe { &*self.param }
     }
 
-    #[inline]
     pub fn sdk(&self) -> &REFrameworkSDKData {
         unsafe { &*self.sdk }
     }
 
     pub fn log(&self) -> Logger {
         Logger::new(self)
+    }
+
+    pub fn tdb(&self) -> &REFrameworkTDB {
+        unsafe {
+            let tdb_ptr: *const __REFrameworkTDBHandle = (self.sdk().functions().get_tdb)();
+            let tdb_: *const REFrameworkTDB = std::mem::transmute(tdb_ptr);
+            &*tdb_
+        }
     }
 }
