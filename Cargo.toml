@@ -1,0 +1,17 @@
+[package]
+name = "reframework_api_rs"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+resolver = "2"
+members = ["macros"]
+
+[dependencies]
+macros = { path = "macros" }
+
+log = { version = "0.4", optional = true }
+
+[features]
+default = ["logging"]
+logging = ["log"]
