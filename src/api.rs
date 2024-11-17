@@ -98,11 +98,8 @@ impl RefAPI {
         Logger::new(self)
     }
 
-    pub fn tdb(&self) -> &REFrameworkTDB {
-        unsafe {
-            let tdb_ptr: *const __REFrameworkTDBHandle = (self.sdk().functions().get_tdb)();
-            let tdb_: *const REFrameworkTDB = std::mem::transmute(tdb_ptr);
-            &*tdb_
-        }
+    pub fn tdb(&self) -> RefAPITDB {
+        let tdb_handle = (self.sdk().functions().get_tdb)();
+        RefAPITDB::new(self, tdb_handle)
     }
 }
