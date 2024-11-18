@@ -25,13 +25,13 @@ pub type REFrameworkResult = i32;
 
 pub type lua_State = *mut c_void;
 
-pub type REFInitializedCb = unsafe extern "C" fn();
+pub type REFInitializedCb = extern "C" fn();
 pub type REFLuaStateCreatedCb = unsafe extern "C" fn(*mut lua_State);
 pub type REFLuaStateDestroyedCb = unsafe extern "C" fn(*mut lua_State);
-pub type REFOnPresentCb = unsafe extern "C" fn();
-pub type REFOnPreApplicationEntryCb = unsafe extern "C" fn();
-pub type REFOnPostApplicationEntryCb = unsafe extern "C" fn();
-pub type REFOnDeviceResetCb = unsafe extern "C" fn();
+pub type REFOnPresentCb = extern "C" fn();
+pub type REFOnPreApplicationEntryCb = extern "C" fn();
+pub type REFOnPostApplicationEntryCb = extern "C" fn();
+pub type REFOnDeviceResetCb = extern "C" fn();
 pub type REFOnMessageCb = unsafe extern "C" fn(*mut c_void, u32, u64, i64) -> bool;
 
 #[repr(C)]
@@ -42,24 +42,24 @@ pub struct REFImGuiFrameCbData {
     pub user_data: *mut c_void,
 }
 
-pub type REFOnImGuiFrameCb = unsafe extern "C" fn(*mut REFImGuiFrameCbData);
-pub type REFOnImGuiDrawUICb = unsafe extern "C" fn(*mut REFImGuiFrameCbData);
+pub type REFOnImGuiFrameCb = extern "C" fn(*mut REFImGuiFrameCbData);
+pub type REFOnImGuiDrawUICb = extern "C" fn(*mut REFImGuiFrameCbData);
 
-pub type REFCreateScriptState = unsafe extern "C" fn() -> *mut lua_State;
+pub type REFCreateScriptState = extern "C" fn() -> *mut lua_State;
 pub type REFDeleteScriptState = unsafe extern "C" fn(*mut lua_State);
 
-pub type REFOnInitializeFn = unsafe extern "C" fn(REFInitializedCb) -> bool;
-pub type REFOnLuaStateCreatedFn = unsafe extern "C" fn(REFLuaStateCreatedCb) -> bool;
-pub type REFOnLuaStateDestroyedFn = unsafe extern "C" fn(REFLuaStateDestroyedCb) -> bool;
-pub type REFOnPresentFn = unsafe extern "C" fn(REFOnPresentCb) -> bool;
+pub type REFOnInitializeFn = extern "C" fn(REFInitializedCb) -> bool;
+pub type REFOnLuaStateCreatedFn = extern "C" fn(REFLuaStateCreatedCb) -> bool;
+pub type REFOnLuaStateDestroyedFn = extern "C" fn(REFLuaStateDestroyedCb) -> bool;
+pub type REFOnPresentFn = extern "C" fn(REFOnPresentCb) -> bool;
 pub type REFOnPreApplicationEntryFn = unsafe extern "C" fn(*const c_char, REFOnPreApplicationEntryCb) -> bool;
 pub type REFOnPostApplicationEntryFn = unsafe extern "C" fn(*const c_char, REFOnPostApplicationEntryCb) -> bool;
-pub type REFLuaLockUnlockFn = unsafe extern "C" fn();
-pub type REFOnDeviceResetFn = unsafe extern "C" fn(REFOnDeviceResetCb) -> bool;
-pub type REFOnMessageFn = unsafe extern "C" fn(REFOnMessageCb) -> bool;
+pub type REFLuaLockUnlockFn = extern "C" fn();
+pub type REFOnDeviceResetFn = extern "C" fn(REFOnDeviceResetCb) -> bool;
+pub type REFOnMessageFn = extern "C" fn(REFOnMessageCb) -> bool;
 
-pub type REFOnImGuiFrameFn = unsafe extern "C" fn(REFOnImGuiFrameCb);
-pub type REFOnImGuiDrawUIFn = unsafe extern "C" fn(REFOnImGuiDrawUICb);
+pub type REFOnImGuiFrameFn = extern "C" fn(REFOnImGuiFrameCb);
+pub type REFOnImGuiDrawUIFn = extern "C" fn(REFOnImGuiDrawUICb);
 
 #[repr(C)]
 pub struct REFrameworkPluginVersion {

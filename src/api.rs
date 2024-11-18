@@ -21,7 +21,6 @@ static mut LOGGER: Option<logger::RefLogger> = None;
 pub struct RefAPI {
     param: *const REFrameworkPluginInitializeParam,
     sdk: *const REFrameworkSDKData,
-    lua_mtx: std::sync::Mutex<()>,
 }
 
 unsafe impl Send for RefAPI {}
@@ -35,11 +34,7 @@ impl RefAPI {
         }
 
         let sdk = (*param).sdk;
-        Some(RefAPI {
-            param,
-            sdk,
-            lua_mtx: std::sync::Mutex::new(()),
-        })
+        Some(RefAPI { param, sdk })
     }
 
     /// Initialize the API instance.
@@ -101,5 +96,10 @@ impl RefAPI {
     pub fn tdb(&self) -> RefAPITDB {
         let tdb_handle = (self.sdk().functions().get_tdb)();
         RefAPITDB::new(self, tdb_handle)
+    }
+
+    /// Creates a new Lua mutex wrapper with the given Lua state.
+    pub fn new_lua_mutex<T>(&self, lua: T) -> RefAPILua<T> {
+        RefAPILua::new(self, lua)
     }
 }

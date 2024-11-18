@@ -122,3 +122,47 @@ impl<'a> RefAPITypeDefinition<'a> {
         unsafe { std::mem::transmute(self.inner) }
     }
 }
+
+/// A mutex-like wrapper around the Lua VM.
+pub struct RefAPILua<'a, T> {
+    api: &'a RefAPI,
+    inner: T,
+}
+
+impl<'a, T> RefAPILua<'a, T> {
+    pub fn new(api: &'a RefAPI, inner: T) -> Self {
+        Self { api, inner }
+    }
+
+    pub fn lock(&self) -> RefAPILuaLock<T> {
+        RefAPILuaLock::new(self.api, &self.inner)
+    }
+}
+
+/// Lua VM mutex lock guard.
+pub struct RefAPILuaLock<'a, 't, T> {
+    api: &'a RefAPI,
+    inner: &'t T,
+}
+
+impl<'a, 't, T> RefAPILuaLock<'a, 't, T> {
+    fn new(api: &'a RefAPI, inner: &'t T) -> Self {
+        (api.param().functions().lock_lua)();
+
+        Self { api, inner }
+    }
+}
+
+impl<'a, 't, T> Drop for RefAPILuaLock<'a, 't, T> {
+    fn drop(&mut self) {
+        (self.api.param().functions().unlock_lua)();
+    }
+}
+
+impl<'a, 't, T> std::ops::Deref for RefAPILuaLock<'a, 't, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner
+    }
+}
