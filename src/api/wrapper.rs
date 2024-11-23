@@ -26,8 +26,10 @@ impl<'a> RefAPITDB<'a> {
     }
 
     pub fn find_type(&self, name: &str) -> Option<RefAPITypeDefinition> {
+        let c_name = CString::new(name).unwrap_or_default();
+
         let func = self.api.sdk().tdb().find_type;
-        let result = func(self.inner_handle(), name.as_ptr() as _);
+        let result = func(self.inner_handle(), c_name.as_ptr() as _);
 
         if result.is_null() {
             None

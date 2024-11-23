@@ -45,7 +45,7 @@ pub struct REFImGuiFrameCbData {
 pub type REFOnImGuiFrameCb = extern "C" fn(*mut REFImGuiFrameCbData);
 pub type REFOnImGuiDrawUICb = extern "C" fn(*mut REFImGuiFrameCbData);
 
-pub type REFCreateScriptState = extern "C" fn() -> *mut lua_State;
+pub type REFCreateScriptState = unsafe extern "C" fn() -> *mut lua_State;
 pub type REFDeleteScriptState = unsafe extern "C" fn(*mut lua_State);
 
 pub type REFOnInitializeFn = extern "C" fn(REFInitializedCb) -> bool;
@@ -401,25 +401,31 @@ pub struct REFrameworkSDKFunctions {
     pub get_resource_manager: extern "C" fn() -> REFrameworkResourceManagerHandle,
     pub get_vm_context: extern "C" fn() -> REFrameworkVMContextHandle, // per-thread context
 
-    pub typeof_: extern "C" fn(type_name: *const c_char) -> REFrameworkManagedObjectHandle, // System.Type
-    pub get_managed_singleton: extern "C" fn(type_name: *const c_char) -> REFrameworkManagedObjectHandle,
-    pub get_native_singleton: extern "C" fn(type_name: *const c_char) -> *mut c_void,
+    pub typeof_: unsafe extern "C" fn(type_name: *const c_char) -> REFrameworkManagedObjectHandle, // System.Type
+    pub get_managed_singleton: unsafe extern "C" fn(type_name: *const c_char) -> REFrameworkManagedObjectHandle,
+    pub get_native_singleton: unsafe extern "C" fn(type_name: *const c_char) -> *mut c_void,
 
     /* out_size is the full size, in bytes of the out buffer */
     /* out_count is how many elements were written to the out buffer, not the size of the written data */
-    pub get_managed_singletons:
-        extern "C" fn(out: *mut REFrameworkManagedSingleton, out_size: u32, out_count: *mut u32) -> REFrameworkResult,
-    pub get_native_singletons:
-        extern "C" fn(out: *mut REFrameworkNativeSingleton, out_size: u32, out_count: *mut u32) -> REFrameworkResult,
+    pub get_managed_singletons: unsafe extern "C" fn(
+        out: *mut REFrameworkManagedSingleton,
+        out_size: u32,
+        out_count: *mut u32,
+    ) -> REFrameworkResult,
+    pub get_native_singletons: unsafe extern "C" fn(
+        out: *mut REFrameworkNativeSingleton,
+        out_size: u32,
+        out_count: *mut u32,
+    ) -> REFrameworkResult,
 
-    pub create_managed_string: extern "C" fn(str: *const wchar_t) -> REFrameworkManagedObjectHandle,
-    pub create_managed_string_normal: extern "C" fn(str: *const c_char) -> REFrameworkManagedObjectHandle,
+    pub create_managed_string: unsafe extern "C" fn(str: *const wchar_t) -> REFrameworkManagedObjectHandle,
+    pub create_managed_string_normal: unsafe extern "C" fn(str: *const c_char) -> REFrameworkManagedObjectHandle,
 
     pub add_hook: extern "C" fn(REFrameworkMethodHandle, REFPreHookFn, REFPostHookFn, ignore_jmp: bool) -> u32,
     pub remove_hook: extern "C" fn(REFrameworkMethodHandle, u32),
 
-    pub allocate: extern "C" fn(size: u64) -> *mut c_void,
-    pub deallocate: extern "C" fn(*mut c_void),
+    pub allocate: unsafe extern "C" fn(size: u64) -> *mut c_void,
+    pub deallocate: unsafe extern "C" fn(*mut c_void),
 }
 
 /// these are NOT pointers to the actual objects

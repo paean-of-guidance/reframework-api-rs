@@ -1,4 +1,4 @@
-pub use crate::api::RefAPI;
+pub use crate::api::*;
 
 pub use crate::REFRAMEWORK_PLUGIN_VERSION_MAJOR;
 pub use crate::REFRAMEWORK_PLUGIN_VERSION_MINOR;
