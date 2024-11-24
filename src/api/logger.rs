@@ -18,8 +18,8 @@ impl Log for RefLogger {
                     Level::Error => api.log().error(&format!("[{}] {}", self.prefix, record.args())),
                     Level::Warn => api.log().warn(&format!("[{}] {}", self.prefix, record.args())),
                     Level::Info => api.log().info(&format!("[{}] {}", self.prefix, record.args())),
-                    Level::Debug => api.log().info(&format!("[{}] DEBUG {}", self.prefix, record.args())),
-                    Level::Trace => api.log().info(&format!("[{}] TRACE {}", self.prefix, record.args())),
+                    Level::Debug => api.log().info(&format!("[{}] DEBUG - {}", self.prefix, record.args())),
+                    Level::Trace => api.log().info(&format!("[{}] TRACE - {}", self.prefix, record.args())),
                 }
             }
         }

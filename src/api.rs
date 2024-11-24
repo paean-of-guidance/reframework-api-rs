@@ -5,6 +5,7 @@ use crate::raw::api::*;
 mod basic_logger;
 #[cfg(feature = "logging")]
 mod logger;
+mod macros;
 mod wrapper;
 
 pub use wrapper::*;
@@ -81,11 +82,15 @@ impl RefAPI {
         self.sdk
     }
 
-    pub fn param(&self) -> &REFrameworkPluginInitializeParam {
+    pub fn param_raw(&self) -> &REFrameworkPluginInitializeParam {
         unsafe { &*self.param }
     }
 
-    pub fn sdk(&self) -> &REFrameworkSDKData {
+    pub fn sdk(&self) -> RefAPISdk {
+        RefAPISdk::new(self)
+    }
+
+    pub fn sdk_raw(&self) -> &REFrameworkSDKData {
         unsafe { &*self.sdk }
     }
 
@@ -94,7 +99,7 @@ impl RefAPI {
     }
 
     pub fn tdb(&self) -> RefAPITDB {
-        let tdb_handle = (self.sdk().functions().get_tdb)();
+        let tdb_handle = (self.sdk_raw().functions().get_tdb)();
         RefAPITDB::new(self, tdb_handle)
     }
 

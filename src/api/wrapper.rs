@@ -7,6 +7,55 @@ use std::{
 
 use super::*;
 
+pub struct RefAPISdk<'a> {
+    api: &'a RefAPI,
+}
+
+impl<'a> RefAPISdk<'a> {
+    pub fn new(api: &'a RefAPI) -> Self {
+        Self { api }
+    }
+
+    pub fn get_managed_singleton(&self, name: &str) -> Option<REFrameworkManagedObjectHandle> {
+        let c_name = CString::new(name).unwrap();
+
+        let func = self.api.sdk_raw().functions().get_managed_singleton;
+
+        let singleton = unsafe { func(c_name.as_ptr()) };
+        if singleton.is_null() {
+            None
+        } else {
+            Some(singleton)
+        }
+    }
+
+    pub fn get_native_singleton(&self, name: &str) -> Option<*mut c_void> {
+        let c_name = CString::new(name).unwrap();
+
+        let func = self.api.sdk_raw().functions().get_native_singleton;
+
+        let singleton = unsafe { func(c_name.as_ptr()) };
+        if singleton.is_null() {
+            None
+        } else {
+            Some(singleton)
+        }
+    }
+
+    pub fn create_managed_string(&self, value: &str) -> Option<REFrameworkManagedObjectHandle> {
+        let value_w = value.encode_utf16().chain(Some(0)).collect::<Vec<_>>();
+
+        let create_managed_string_func = self.api.sdk_raw().functions().create_managed_string;
+
+        let managed_string = unsafe { create_managed_string_func(value_w.as_ptr() as *const i16) };
+        if managed_string.is_null() {
+            None
+        } else {
+            Some(managed_string)
+        }
+    }
+}
+
 pub struct RefAPITDB<'a> {
     api: &'a RefAPI,
     inner: *const REFrameworkTDB,
@@ -31,7 +80,7 @@ impl<'a> RefAPITDB<'a> {
     pub fn find_type(&self, name: &str) -> Option<RefAPITypeDefinition> {
         let c_name = CString::new(name).unwrap_or_default();
 
-        let find_type_func = self.api.sdk().tdb().find_type;
+        let find_type_func = self.api.sdk_raw().tdb().find_type;
         let result = find_type_func(self.inner_handle(), c_name.as_ptr() as _);
 
         if result.is_null() {
@@ -45,7 +94,7 @@ impl<'a> RefAPITDB<'a> {
         let c_type_name = CString::new(type_name).unwrap_or_default();
         let c_name = CString::new(name).unwrap_or_default();
 
-        let find_method_func = self.api.sdk().tdb().find_method;
+        let find_method_func = self.api.sdk_raw().tdb().find_method;
         let result = find_method_func(self.inner_handle(), c_type_name.as_ptr() as _, c_name.as_ptr() as _);
 
         if result.is_null() {
@@ -107,7 +156,7 @@ impl<'a> RefAPIMethod<'a> {
     }
 
     pub fn add_hook(&self, pre_fn: Option<REFPreHookFn>, post_fn: Option<REFPostHookFn>, ignore_jmp: bool) -> u32 {
-        let add_hook_func = self.api.sdk().functions().add_hook;
+        let add_hook_func = self.api.sdk_raw().functions().add_hook;
 
         let pre_fn_ptr: REFPreHookFn = if let Some(pre_fn) = pre_fn {
             pre_fn
@@ -132,7 +181,7 @@ impl<'a> RefAPIMethod<'a> {
         let mut out = InvokeRet::default();
 
         unsafe {
-            (self.api.sdk().method().invoke)(
+            (self.api.sdk_raw().method().invoke)(
                 self.inner_handle(),
                 obj,
                 args.as_mut_ptr(),
@@ -203,7 +252,7 @@ pub struct RefAPILuaLock<'a, 't, T> {
 
 impl<'a, 't, T> RefAPILuaLock<'a, 't, T> {
     fn new(api: &'a RefAPI, inner: &'t T) -> Self {
-        (api.param().functions().lock_lua)();
+        (api.param_raw().functions().lock_lua)();
 
         Self { api, inner }
     }
@@ -211,7 +260,7 @@ impl<'a, 't, T> RefAPILuaLock<'a, 't, T> {
 
 impl<'a, 't, T> Drop for RefAPILuaLock<'a, 't, T> {
     fn drop(&mut self) {
-        (self.api.param().functions().unlock_lua)();
+        (self.api.param_raw().functions().unlock_lua)();
     }
 }
 
