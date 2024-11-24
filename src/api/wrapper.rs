@@ -1,6 +1,9 @@
 #![allow(clippy::missing_transmute_annotations, clippy::not_unsafe_ptr_arg_deref)]
 
-use std::ffi::CString;
+use std::{
+    ffi::{c_void, CString},
+    ptr::addr_of_mut,
+};
 
 use super::*;
 
@@ -28,8 +31,8 @@ impl<'a> RefAPITDB<'a> {
     pub fn find_type(&self, name: &str) -> Option<RefAPITypeDefinition> {
         let c_name = CString::new(name).unwrap_or_default();
 
-        let func = self.api.sdk().tdb().find_type;
-        let result = func(self.inner_handle(), c_name.as_ptr() as _);
+        let find_type_func = self.api.sdk().tdb().find_type;
+        let result = find_type_func(self.inner_handle(), c_name.as_ptr() as _);
 
         if result.is_null() {
             None
@@ -42,13 +45,42 @@ impl<'a> RefAPITDB<'a> {
         let c_type_name = CString::new(type_name).unwrap_or_default();
         let c_name = CString::new(name).unwrap_or_default();
 
-        let func = self.api.sdk().tdb().find_method;
-        let result = func(self.inner_handle(), c_type_name.as_ptr() as _, c_name.as_ptr() as _);
+        let find_method_func = self.api.sdk().tdb().find_method;
+        let result = find_method_func(self.inner_handle(), c_type_name.as_ptr() as _, c_name.as_ptr() as _);
 
         if result.is_null() {
             None
         } else {
             Some(RefAPIMethod::new(self.api, result))
+        }
+    }
+}
+
+#[repr(C, packed)]
+pub union InvokeRetUnion {
+    pub bytes: [u8; 128],
+    pub byte: u8,
+    pub word: u16,
+    pub dword: u32,
+    pub f: f32,
+    pub qword: u64,
+    pub d: f64,
+    pub ptr: *mut std::ffi::c_void,
+}
+
+#[repr(C, packed)]
+pub struct InvokeRet {
+    pub data: InvokeRetUnion,
+    pub exception_thrown: bool,
+}
+
+impl Default for InvokeRet {
+    fn default() -> Self {
+        // let data = unsafe { MaybeUninit::zeroed().assume_init() };
+        let data = InvokeRetUnion { bytes: [0; 128] };
+        Self {
+            data,
+            exception_thrown: false,
         }
     }
 }
@@ -75,7 +107,7 @@ impl<'a> RefAPIMethod<'a> {
     }
 
     pub fn add_hook(&self, pre_fn: Option<REFPreHookFn>, post_fn: Option<REFPostHookFn>, ignore_jmp: bool) -> u32 {
-        let func = self.api.sdk().functions().add_hook;
+        let add_hook_func = self.api.sdk().functions().add_hook;
 
         let pre_fn_ptr: REFPreHookFn = if let Some(pre_fn) = pre_fn {
             pre_fn
@@ -88,7 +120,29 @@ impl<'a> RefAPIMethod<'a> {
             void_post_hook_fn
         };
 
-        func(self.inner_handle(), pre_fn_ptr, post_fn_ptr, ignore_jmp)
+        add_hook_func(self.inner_handle(), pre_fn_ptr, post_fn_ptr, ignore_jmp)
+    }
+
+    pub fn invoke(&self, obj: *mut c_void, args: &mut [*mut c_void]) -> InvokeRet {
+        if args.is_empty() {
+            // TODO: invoke with no args
+            panic!("RefAPIMethod::invoke with no args is not supported yet.");
+        }
+
+        let mut out = InvokeRet::default();
+
+        unsafe {
+            (self.api.sdk().method().invoke)(
+                self.inner_handle(),
+                obj,
+                args.as_mut_ptr(),
+                std::mem::size_of_val(args) as u32,
+                addr_of_mut!(out) as *mut c_void,
+                size_of::<InvokeRet>() as u32,
+            );
+        }
+
+        out
     }
 }
 
@@ -120,7 +174,7 @@ impl<'a> RefAPITypeDefinition<'a> {
         unsafe { &*self.inner }
     }
 
-    fn inner_handle(&self) -> REFrameworkTypeDefinitionHandle {
+    pub fn inner_handle(&self) -> REFrameworkTypeDefinitionHandle {
         unsafe { std::mem::transmute(self.inner) }
     }
 }

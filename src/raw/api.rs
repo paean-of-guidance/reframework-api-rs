@@ -212,7 +212,7 @@ pub struct REFrameworkMethodParameter {
 pub struct REFrameworkTDBMethod {
     /* make sure out size is at least size of InvokeRet */
     /* each arg is always 8 bytes, even if it's something like a byte */
-    pub invoke: extern "C" fn(
+    pub invoke: unsafe extern "C" fn(
         REFrameworkMethodHandle,
         thisptr: *mut c_void,
         in_args: *mut *mut c_void,
