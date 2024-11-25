@@ -72,14 +72,12 @@ impl RefAPI {
         log::set_max_level(max_level);
     }
 
-    #[inline]
-    pub fn param_ptr(&self) -> *const REFrameworkPluginInitializeParam {
-        self.param
+    pub fn param(&self) -> RefAPIParam {
+        RefAPIParam::new(self)
     }
 
-    #[inline]
-    pub fn sdk_ptr(&self) -> *const REFrameworkSDKData {
-        self.sdk
+    pub fn param_ptr(&self) -> *const REFrameworkPluginInitializeParam {
+        self.param
     }
 
     pub fn param_raw(&self) -> &REFrameworkPluginInitializeParam {
@@ -88,6 +86,10 @@ impl RefAPI {
 
     pub fn sdk(&self) -> RefAPISdk {
         RefAPISdk::new(self)
+    }
+
+    pub fn sdk_ptr(&self) -> *const REFrameworkSDKData {
+        self.sdk
     }
 
     pub fn sdk_raw(&self) -> &REFrameworkSDKData {

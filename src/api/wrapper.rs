@@ -56,6 +56,28 @@ impl<'a> RefAPISdk<'a> {
     }
 }
 
+pub struct RefAPIParam<'a> {
+    api: &'a RefAPI,
+}
+
+impl<'a> RefAPIParam<'a> {
+    pub fn new(api: &'a RefAPI) -> Self {
+        Self { api }
+    }
+
+    pub fn on_lua_state_created(&self, callback: REFLuaStateCreatedCb) -> bool {
+        let result = (self.api.param_raw().functions().on_lua_state_created)(callback);
+
+        result
+    }
+
+    pub fn on_lua_state_destroyed(&self, callback: REFLuaStateDestroyedCb) -> bool {
+        let result = (self.api.param_raw().functions().on_lua_state_destroyed)(callback);
+
+        result
+    }
+}
+
 pub struct RefAPITDB<'a> {
     api: &'a RefAPI,
     inner: *const REFrameworkTDB,
