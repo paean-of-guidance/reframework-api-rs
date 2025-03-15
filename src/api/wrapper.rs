@@ -1,7 +1,7 @@
 #![allow(clippy::missing_transmute_annotations, clippy::not_unsafe_ptr_arg_deref)]
 
 use std::{
-    ffi::{c_void, CString},
+    ffi::{CString, c_void},
     ptr::addr_of_mut,
 };
 
@@ -22,11 +22,7 @@ impl<'a> RefAPISdk<'a> {
         let func = self.api.sdk_raw().functions().get_managed_singleton;
 
         let singleton = unsafe { func(c_name.as_ptr()) };
-        if singleton.is_null() {
-            None
-        } else {
-            Some(singleton)
-        }
+        if singleton.is_null() { None } else { Some(singleton) }
     }
 
     pub fn get_native_singleton(&self, name: &str) -> Option<*mut c_void> {
@@ -35,11 +31,7 @@ impl<'a> RefAPISdk<'a> {
         let func = self.api.sdk_raw().functions().get_native_singleton;
 
         let singleton = unsafe { func(c_name.as_ptr()) };
-        if singleton.is_null() {
-            None
-        } else {
-            Some(singleton)
-        }
+        if singleton.is_null() { None } else { Some(singleton) }
     }
 
     pub fn create_managed_string(&self, value: &str) -> Option<REFrameworkManagedObjectHandle> {
@@ -158,10 +150,10 @@ impl Default for InvokeRet {
 
 impl std::fmt::Debug for InvokeRet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let data_as_ptr = unsafe { std::ptr::addr_of!(self.data.ptr).read_unaligned() };
+        let data_as_ptr = format!("{:p}", data_as_ptr);
         f.debug_struct("InvokeRet")
-            .field("data(ptr)", unsafe {
-                &format!("{:p}", &*(self.data.ptr as *const usize))
-            })
+            .field("data(as ptr)", &data_as_ptr)
             .field("exception_thrown", &self.exception_thrown)
             .finish()
     }
@@ -234,6 +226,7 @@ extern "C" fn void_pre_hook_fn(
 extern "C" fn void_post_hook_fn(_: *mut *mut std::ffi::c_void, _: REFrameworkTypeDefinitionHandle, _: u64) {}
 
 pub struct RefAPITypeDefinition<'a> {
+    #[allow(dead_code)]
     api: &'a RefAPI,
     inner: *const REFrameworkTDBTypeDefinition,
 }
@@ -285,13 +278,13 @@ impl<'a, 't, T> RefAPILuaLock<'a, 't, T> {
     }
 }
 
-impl<'a, 't, T> Drop for RefAPILuaLock<'a, 't, T> {
+impl<T> Drop for RefAPILuaLock<'_, '_, T> {
     fn drop(&mut self) {
         (self.api.param_raw().functions().unlock_lua)();
     }
 }
 
-impl<'a, 't, T> std::ops::Deref for RefAPILuaLock<'a, 't, T> {
+impl<T> std::ops::Deref for RefAPILuaLock<'_, '_, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {

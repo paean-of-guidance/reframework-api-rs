@@ -1,6 +1,6 @@
 use basic_logger::Logger;
 
-use crate::raw::api::*;
+use crate::{raw::api::*, static_ref};
 
 mod basic_logger;
 #[cfg(feature = "logging")]
@@ -34,7 +34,7 @@ impl RefAPI {
             return None;
         }
 
-        let sdk = (*param).sdk;
+        let sdk = unsafe { (*param).sdk };
         Some(RefAPI { param, sdk })
     }
 
@@ -42,14 +42,16 @@ impl RefAPI {
     ///
     /// After initialized, use [RefAPI::instance] to get the instance.
     pub unsafe fn initialize(param: *const REFrameworkPluginInitializeParam) -> Option<&'static RefAPI> {
-        INSTANCE = RefAPI::new(param);
+        unsafe {
+            INSTANCE = RefAPI::new(param);
 
-        Self::instance()
+            Self::instance()
+        }
     }
 
     /// Gets the current API instance.
     pub fn instance() -> Option<&'static RefAPI> {
-        unsafe { INSTANCE.as_ref() }
+        unsafe { static_ref!(INSTANCE).as_ref() }
     }
 
     #[cfg(feature = "logging")]
@@ -66,9 +68,11 @@ impl RefAPI {
         }
 
         let logger = RefLogger::new(prefix);
-        LOGGER = Some(logger);
 
-        let _ = log::set_logger(LOGGER.as_ref().unwrap());
+        unsafe {
+            LOGGER = Some(logger);
+            let _ = log::set_logger(static_ref!(LOGGER).as_ref().unwrap());
+        }
         log::set_max_level(max_level);
     }
 
