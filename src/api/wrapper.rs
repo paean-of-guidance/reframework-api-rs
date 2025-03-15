@@ -156,6 +156,17 @@ impl Default for InvokeRet {
     }
 }
 
+impl std::fmt::Debug for InvokeRet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("InvokeRet")
+            .field("data(ptr)", unsafe {
+                &format!("{:p}", &*(self.data.ptr as *const usize))
+            })
+            .field("exception_thrown", &self.exception_thrown)
+            .finish()
+    }
+}
+
 pub struct RefAPIMethod<'a> {
     api: &'a RefAPI,
     inner: *const REFrameworkTDBMethod,
@@ -195,13 +206,7 @@ impl<'a> RefAPIMethod<'a> {
     }
 
     pub fn invoke(&self, obj: *mut c_void, args: &mut [*mut c_void]) -> InvokeRet {
-        if args.is_empty() {
-            // TODO: invoke with no args
-            panic!("RefAPIMethod::invoke with no args is not supported yet.");
-        }
-
         let mut out = InvokeRet::default();
-
         unsafe {
             (self.api.sdk_raw().method().invoke)(
                 self.inner_handle(),

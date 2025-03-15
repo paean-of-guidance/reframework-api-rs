@@ -3,7 +3,7 @@
 use std::ffi::{c_char, c_void};
 pub type wchar_t = i16;
 
-use macros::declare_reframework_handle;
+use reframework_api_rs_macros::declare_reframework_handle;
 
 pub const REFRAMEWORK_PLUGIN_VERSION_MAJOR: i32 = 1;
 pub const REFRAMEWORK_PLUGIN_VERSION_MINOR: i32 = 10;

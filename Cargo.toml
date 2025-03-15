@@ -1,6 +1,6 @@
 [package]
 name = "reframework_api_rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [workspace]
@@ -8,7 +8,7 @@ resolver = "2"
 members = ["macros"]
 
 [dependencies]
-macros = { path = "macros" }
+reframework-api-rs-macros = { path = "macros" }
 
 log = { version = "0.4", optional = true }
 

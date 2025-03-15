@@ -1,5 +1,9 @@
 #[macro_export]
 macro_rules! invoke_method {
+    ($method:ident, $this:ident) => {{
+        let mut args: Vec<*mut c_void> = Vec::new();
+        $method.invoke($this as *mut c_void, &mut args)
+    }};
     ($method:ident, $this:ident, $($arg:expr),*) => {{
         let mut args: Vec<*mut c_void> = Vec::new();
 
